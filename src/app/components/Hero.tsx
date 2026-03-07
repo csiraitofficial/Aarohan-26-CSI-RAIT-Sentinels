@@ -1,6 +1,8 @@
 import { ParticleBackground } from './ParticleBackground';
+import { useNavigate } from 'react-router';
 
 export function Hero() {
+  const navigate = useNavigate();
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -43,6 +45,7 @@ export function Hero() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button
+            onClick={() => navigate('/protect')}
             className="px-8 py-4 bg-[#00d4ff] text-[#050a0f] transition-all duration-300 cta-pulse-button"
             style={{
               fontFamily: 'Orbitron, sans-serif',

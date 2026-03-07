@@ -1,0 +1,119 @@
+Build a single-page website for "Sentinel" — a proactive AI image protection system that defends against deepfakes. The site must feel like a premium cybersecurity product, not a student project. Every design choice should communicate trust, intelligence, and technical depth.
+
+🎨 Visual Identity & Theme
+
+Color palette: Deep space black #050a0f as the base. Primary accent: electric cyan #00d4ff. Secondary: emerald green #00ff88 for success states. Warning/alert red #ff2d55 for threat indicators. Muted mid-tone #0d1f2d for card surfaces.
+No generic "hacker green on black" — the cyan/emerald combo feels modern, not retro terminal.
+Glassmorphism cards: backdrop-filter: blur(16px) with background: rgba(255,255,255,0.04) and a 1px border using rgba(0,212,255,0.15). No solid box shadows — use glow: box-shadow: 0 0 30px rgba(0,212,255,0.1).
+No plain rectangles — clip corners (clip-path: polygon(...)) on at least section headers and the hero CTA button to give a "tactical HUD" feel.
+
+
+🔤 Typography
+
+Import from Google Fonts:
+
+Orbitron — headings, logo, section titles (sci-fi, geometric, cyberpunk-adjacent)
+Inter — body text, descriptions (clean, readable, modern)
+
+
+Logo: SENTINEL in Orbitron Bold with a text-shadow: 0 0 20px #00d4ff glow effect.
+Use letter-spacing: 0.15em on all uppercase headings.
+
+
+🧭 Page Structure (Single Page, Scroll-Based)
+1. Navbar
+
+Fixed, transparent on load → frosted glass on scroll (add .scrolled class via JS)
+Left: Shield SVG icon + SENTINEL wordmark
+Right: nav links (Problem, Solution, How It Works, Tech, Team) + a glowing CTA button "Get Protected"
+On mobile: hamburger → slide-in drawer
+
+2. Hero Section
+
+Full viewport height
+Headline: "Your Image. Your Identity. Protected." in Orbitron, ~72px, white
+Subheadline (Inter, ~18px, muted): "Sentinel applies invisible adversarial protection to your photos — making them immune to deepfake AI before the damage is done."
+Two CTAs: [Protect My Image] (cyan filled, clipped corners) + [See How It Works] (ghost/outline)
+Background animation (canvas or CSS): Slowly drifting particle grid — tiny dots connected by faint cyan lines, like a neural network. Keep it subtle at ~15% opacity. Do NOT use video.
+Floating "shield scan" ring animation in the hero: a circle that pulses outward in ripples (CSS keyframes @keyframes sonar), centered behind the CTAs.
+
+3. Problem Section
+
+Section title: THE THREAT with a red #ff2d55 accent line only 40px wide under "THREAT"
+Layout: two columns — left is a stat block (large Orbitron numbers: 1 photo, seconds, identity stolen), right is the problem text
+Add a subtle animated "threat counter" ticking up with JS setInterval (e.g., "AI deepfakes created today: [incrementing number]")
+
+4. Solution Section
+
+Title: HOW SENTINEL PROTECTS YOU
+Three glassmorphism cards in a row, each with:
+
+A glowing icon (SVG, cyan)
+Bold heading
+2–3 line description
+
+
+Cards: Upload → Protect → Share Safely
+On hover: card border glows brighter box-shadow: 0 0 40px rgba(0,212,255,0.3), slight translateY(-6px) lift
+
+5. Technical Approach — "How It Works"
+
+Timeline/stepper layout (vertical on mobile, horizontal on desktop)
+5 steps: Upload → Preprocess → Adversarial Noise → Quality Check → Return Protected Image
+Each step: numbered node (cyan circle with number) connected by a dashed animated line (stroke-dashoffset CSS animation flowing downward/rightward)
+No bullet lists — all prose in Inter
+
+6. Tech Stack Section
+
+Title: BUILT WITH
+Hexagonal icon grid (CSS hex shapes or SVG) for each tech: HTML/CSS/JS, Python, OpenCV, NumPy, Pillow, SHA-256
+Each hex: dark fill, cyan border, tech name below in small Orbitron caps
+
+7. Impact & Feasibility
+
+Three column layout: Social Impact / Security Impact / Technological Impact
+Each column: icon at top (SVG), bold heading, paragraph text
+Background: slightly lighter #0d1f2d to create section contrast
+
+8. Limitations & Future Scope
+
+Split panel: left (red-tinted glassmorphism card) = Limitations, right (green-tinted) = Future Scope
+Use #ff2d55 at 10% opacity for the limitations card background, #00ff88 at 10% for future scope
+Bullet items rendered as tag chips, not plain lists
+
+9. Team Section
+
+4 team member cards in a row
+Each card: avatar placeholder with a hexagonal clip-path, name in Orbitron, batch year, institute tag
+Card hover: cyan outline appears with a subtle inner glow
+
+10. Footer
+
+Dark strip: SENTINEL © 2025 · Team Sentinels · RAIT
+Shield icon centered above the text
+Faint scanline texture overlay using a CSS repeating linear gradient
+
+
+✨ Animations — Purposeful, Not Decorative
+ElementAnimationHero particlesCanvas: slow drifting dots with connecting linesHero shield ringCSS @keyframes radial pulse, 3s loop, low opacityNavbar on scrollSmooth backdrop-filter + border transitionSection entranceIntersectionObserver → opacity: 0; translateY(30px) → opacity: 1; translateY(0) on enter, 0.6s easeStepper lineSVG stroke-dashoffset animation triggered on scrollCard hovertransform: translateY(-6px) + glow box-shadow, 0.3s easeThreat counterJS setInterval counting up every 80msCTA buttonSubtle box-shadow pulse loop 0 0 0 → 0 0 20px #00d4ff → 0 0 0
+All animations: respect prefers-reduced-motion — wrap in a media query check.
+
+📐 Layout Rules
+
+Max content width: 1200px, centered
+Section padding: 100px 0 desktop, 60px 0 mobile
+Grid gaps: 32px
+Responsive breakpoints: 768px (tablet), 480px (mobile)
+Smooth scroll: scroll-behavior: smooth on html
+All section IDs must match navbar links
+
+
+⚙️ Code Requirements
+
+Pure HTML + CSS + JavaScript only — no frameworks, no libraries
+All in a single .html file
+Google Fonts via <link> in <head>
+Canvas particle system in a <script> block
+IntersectionObserver for scroll animations
+Mobile-first responsive with CSS Grid and Flexbox
+No jQuery, no Bootstrap, no external CSS files

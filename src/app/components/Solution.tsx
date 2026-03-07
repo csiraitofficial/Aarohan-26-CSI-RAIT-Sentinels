@@ -1,10 +1,42 @@
 import { useEffect, useRef, useState } from 'react';
-import { Upload, Lock, CheckCircle } from 'lucide-react';
+import { Upload, Lock, CheckCircle, Download } from 'lucide-react';
+
+interface NodeData {
+  angle: number;
+  icon: React.ElementType;
+  label: string;
+  description: string;
+}
 
 export function Solution() {
   const [radarAngle, setRadarAngle] = useState(0);
   const [nodesVisible, setNodesVisible] = useState([false, false, false]);
+  const [labelsVisible, setLabelsVisible] = useState([false, false, false]);
+  const [linesVisible, setLinesVisible] = useState([false, false, false]);
+  const [hoveredNode, setHoveredNode] = useState<number | null>(null);
+  const [activeTooltip, setActiveTooltip] = useState<number | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  const nodes: NodeData[] = [
+    {
+      angle: -90,
+      icon: Upload,
+      label: 'UPLOAD',
+      description: "Drop your photo into Sentinel's encrypted pipeline. Your original file never leaves the secure environment unprotected.",
+    },
+    {
+      angle: 30,
+      icon: Lock,
+      label: 'GET PROTECTED',
+      description: 'Sentinel injects invisible adversarial noise using the FGSM algorithm — imperceptible to humans, catastrophic to deepfake AI models.',
+    },
+    {
+      angle: 150,
+      icon: Download,
+      label: 'DOWNLOAD',
+      description: 'Retrieve your shielded image. Visually identical to the original — but any AI that tries to clone your face will produce distorted, unusable output.',
+    },
+  ];
 
   useEffect(() => {
     // Radar sweep animation
@@ -15,15 +47,25 @@ export function Solution() {
     };
     animationId = requestAnimationFrame(animate);
 
-    // Intersection observer for node animations
+    // Intersection observer for node burst animation
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Stagger node appearance
-            setTimeout(() => setNodesVisible([true, false, false]), 100);
-            setTimeout(() => setNodesVisible([true, true, false]), 400);
-            setTimeout(() => setNodesVisible([true, true, true]), 700);
+            // Burst animation: nodes launch from center
+            setTimeout(() => setNodesVisible([true, false, false]), 0);
+            setTimeout(() => setNodesVisible([true, true, false]), 150);
+            setTimeout(() => setNodesVisible([true, true, true]), 300);
+
+            // Labels fade in after nodes arrive
+            setTimeout(() => setLabelsVisible([true, false, false]), 200);
+            setTimeout(() => setLabelsVisible([true, true, false]), 350);
+            setTimeout(() => setLabelsVisible([true, true, true]), 500);
+
+            // Lines fade in after nodes arrive
+            setTimeout(() => setLinesVisible([true, false, false]), 500);
+            setTimeout(() => setLinesVisible([true, true, false]), 650);
+            setTimeout(() => setLinesVisible([true, true, true]), 800);
           }
         });
       },
@@ -40,29 +82,39 @@ export function Solution() {
     };
   }, []);
 
-  const nodes = [
-    { 
-      angle: -90, 
-      icon: Upload, 
-      label: 'UPLOAD SHIELD',
-      description: 'Your image enters an encrypted pipeline. Zero data retention.',
-    },
-    { 
-      angle: 30, 
-      icon: Lock, 
-      label: 'ENCRYPT LAYER',
-      description: 'Invisible adversarial perturbations embedded via FGSM algorithm.',
-    },
-    { 
-      angle: 150, 
-      icon: CheckCircle, 
-      label: 'SAFE DEPLOY',
-      description: 'Protected image returned. Deepfake AI encounters only noise.',
-    },
-  ];
+  const handleNodeClick = (index: number) => {
+    // For mobile: toggle tooltip
+    if (window.innerWidth <= 768) {
+      setActiveTooltip(activeTooltip === index ? null : index);
+    }
+  };
+
+  const handleNodeMouseEnter = (index: number) => {
+    if (window.innerWidth > 768) {
+      setHoveredNode(index);
+    }
+  };
+
+  const handleNodeMouseLeave = () => {
+    if (window.innerWidth > 768) {
+      setHoveredNode(null);
+    }
+  };
+
+  const handleBackgroundClick = () => {
+    // Close tooltips on mobile when clicking outside
+    if (window.innerWidth <= 768) {
+      setActiveTooltip(null);
+    }
+  };
 
   return (
-    <section id="solution" ref={sectionRef} className="py-24 md:py-32 px-6 bg-[#050a0f]">
+    <section
+      id="solution"
+      ref={sectionRef}
+      className="py-24 md:py-32 px-6 bg-[#050a0f] relative"
+      onClick={handleBackgroundClick}
+    >
       <div className="max-w-[1200px] mx-auto">
         <div className="text-center mb-16">
           <h2
@@ -84,7 +136,7 @@ export function Solution() {
         </div>
 
         {/* Orbital Defense Ring */}
-        <div className="relative w-full max-w-[600px] aspect-square mx-auto mb-16">
+        <div className="relative w-full max-w-[600px] aspect-square mx-auto" style={{ overflow: 'visible' }}>
           {/* Radar sweep background */}
           <div
             className="absolute inset-0 rounded-full"
@@ -113,12 +165,13 @@ export function Solution() {
                   opacity="0.4"
                 />
               </svg>
-              
+
               {/* Shield icon */}
               <div
                 className="absolute inset-0 flex items-center justify-center"
                 style={{
-                  background: 'radial-gradient(circle, rgba(0, 212, 255, 0.2) 0%, rgba(5, 10, 15, 0.9) 70%)',
+                  background:
+                    'radial-gradient(circle, rgba(0, 212, 255, 0.2) 0%, rgba(5, 10, 15, 0.9) 70%)',
                   borderRadius: '50%',
                   boxShadow: '0 0 40px rgba(0, 212, 255, 0.5)',
                 }}
@@ -145,12 +198,31 @@ export function Solution() {
             const x = Math.cos(angleRad) * radius;
             const y = Math.sin(angleRad) * radius;
 
+            const isHovered = hoveredNode === index;
+            const showTooltip = isHovered || activeTooltip === index;
+
+            // Determine tooltip position and arrow direction
+            // Top node (index 0, UPLOAD) and bottom-right node (index 1, GET PROTECTED): tooltip on right
+            // Bottom-left node (index 2, DOWNLOAD): tooltip on left
+            const tooltipOnLeft = index === 2;
+            const arrowStartX = tooltipOnLeft ? -32 : 32; // Start from left or right edge of circle
+            const arrowLength = 55;
+            const arrowAngle = 15; // Upward tilt in degrees
+            const arrowEndX = tooltipOnLeft
+              ? arrowStartX - arrowLength * Math.cos((arrowAngle * Math.PI) / 180)
+              : arrowStartX + arrowLength * Math.cos((arrowAngle * Math.PI) / 180);
+            const arrowEndY = -arrowLength * Math.sin((arrowAngle * Math.PI) / 180);
+
             return (
               <div key={index}>
                 {/* Connecting line to center */}
                 <svg
                   className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
-                  style={{ transform: 'translate(-50%, -50%)' }}
+                  style={{
+                    transform: 'translate(-50%, -50%)',
+                    opacity: linesVisible[index] ? 0.4 : 0,
+                    transition: 'opacity 0.4s ease',
+                  }}
                 >
                   <line
                     x1="50%"
@@ -160,75 +232,144 @@ export function Solution() {
                     stroke="#00d4ff"
                     strokeWidth="1"
                     strokeDasharray="5 5"
-                    opacity="0.4"
                     className="flowing-line"
                   />
                 </svg>
 
                 {/* Node */}
                 <div
-                  className={`absolute top-1/2 left-1/2 transition-all duration-300 ${
-                    nodesVisible[index]
-                      ? 'opacity-100 scale-100'
-                      : 'opacity-0 scale-50'
-                  }`}
+                  className="absolute top-1/2 left-1/2 z-20"
                   style={{
-                    transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
+                    transform: nodesVisible[index]
+                      ? `translate(-50%, -50%) translate(${x}px, ${y}px) scale(1)`
+                      : 'translate(-50%, -50%) translate(0, 0) scale(0)',
+                    opacity: nodesVisible[index] ? 1 : 0,
+                    transition:
+                      'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease',
                   }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNodeClick(index);
+                  }}
+                  onMouseEnter={() => handleNodeMouseEnter(index)}
+                  onMouseLeave={handleNodeMouseLeave}
                 >
+                  {/* New Tooltip with Arrow */}
+                  {showTooltip && (
+                    <div className="absolute top-0 left-0 pointer-events-none z-50">
+                      {/* Arrow SVG */}
+                      <svg
+                        className="absolute"
+                        style={{
+                          width: Math.abs(arrowEndX - arrowStartX) + 20,
+                          height: Math.abs(arrowEndY) + 20,
+                          left: tooltipOnLeft ? arrowEndX - 10 : arrowStartX - 10,
+                          top: arrowEndY - 10,
+                          overflow: 'visible',
+                        }}
+                      >
+                        <line
+                          x1={tooltipOnLeft ? Math.abs(arrowEndX - arrowStartX) + 10 : 10}
+                          y1={Math.abs(arrowEndY) + 10}
+                          x2={tooltipOnLeft ? 10 : Math.abs(arrowEndX - arrowStartX) + 10}
+                          y2="10"
+                          stroke="#00d4ff"
+                          strokeWidth="1.5"
+                          style={{
+                            strokeDasharray: arrowLength,
+                            strokeDashoffset: showTooltip ? 0 : arrowLength,
+                            transition: 'stroke-dashoffset 0.3s ease',
+                          }}
+                        />
+                      </svg>
+
+                      {/* Description Box */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: tooltipOnLeft ? arrowEndX - 220 : arrowEndX,
+                          top: arrowEndY - 10,
+                          background: 'rgba(5, 10, 15, 0.92)',
+                          border: '1px solid rgba(0, 212, 255, 0.25)',
+                          backdropFilter: 'blur(14px)',
+                          boxShadow:
+                            '0 0 24px rgba(0, 212, 255, 0.15), inset 0 0 0 1px rgba(0,212,255,0.05)',
+                          borderRadius: '6px',
+                          padding: '14px 18px',
+                          maxWidth: '220px',
+                          minWidth: '180px',
+                          zIndex: 50,
+                          opacity: showTooltip ? 1 : 0,
+                          transform: showTooltip
+                            ? 'translateX(0)'
+                            : tooltipOnLeft
+                            ? 'translateX(8px)'
+                            : 'translateX(-8px)',
+                          transition: 'opacity 0.25s ease, transform 0.25s ease',
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontFamily: 'Orbitron, sans-serif',
+                            fontWeight: 700,
+                            fontSize: '0.65rem',
+                            letterSpacing: '0.12em',
+                            color: '#00d4ff',
+                            textTransform: 'uppercase',
+                            marginBottom: '8px',
+                          }}
+                        >
+                          {node.label}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: 'Inter, sans-serif',
+                            fontSize: '0.78rem',
+                            lineHeight: 1.6,
+                            color: 'rgba(255, 255, 255, 0.75)',
+                          }}
+                        >
+                          {node.description}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Node Circle */}
                   <div
-                    className="w-16 h-16 rounded-full flex items-center justify-center"
+                    className="w-16 h-16 rounded-full flex items-center justify-center cursor-pointer"
                     style={{
                       background: 'rgba(5, 10, 15, 0.9)',
-                      border: '2px solid #00d4ff',
-                      boxShadow: '0 0 15px rgba(0, 212, 255, 0.6)',
+                      border: isHovered ? '3px solid #00d4ff' : '2px solid #00d4ff',
+                      boxShadow: isHovered
+                        ? '0 0 35px rgba(0, 212, 255, 1), 0 0 60px rgba(0, 212, 255, 0.4)'
+                        : '0 0 15px rgba(0, 212, 255, 0.6)',
+                      transform: isHovered ? 'scale(1.15)' : 'scale(1)',
+                      transition: 'all 0.25s ease',
                     }}
                   >
                     <node.icon className="w-8 h-8 text-[#00d4ff]" strokeWidth={2} />
+                  </div>
+
+                  {/* Node Label */}
+                  <div
+                    className="absolute top-full mt-3 left-1/2 -translate-x-1/2 whitespace-nowrap text-center"
+                    style={{
+                      fontFamily: 'Orbitron, sans-serif',
+                      fontSize: '0.75rem',
+                      letterSpacing: '0.1em',
+                      color: isHovered ? '#ffffff' : '#00d4ff',
+                      fontWeight: 700,
+                      opacity: labelsVisible[index] ? 1 : 0,
+                      transition: 'opacity 0.4s ease, color 0.25s ease',
+                    }}
+                  >
+                    {node.label}
                   </div>
                 </div>
               </div>
             );
           })}
-        </div>
-
-        {/* Stat Bars */}
-        <div className="space-y-4 max-w-[900px] mx-auto">
-          {nodes.map((node, index) => (
-            <div
-              key={index}
-              className="stat-bar group cursor-default"
-              style={{
-                borderLeft: '2px solid #00d4ff',
-                paddingLeft: '1.5rem',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              <div className="flex items-center gap-4">
-                <node.icon className="w-5 h-5 text-[#00d4ff] flex-shrink-0" strokeWidth={2} />
-                <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                  <span
-                    className="text-lg whitespace-nowrap"
-                    style={{
-                      fontFamily: 'Orbitron, sans-serif',
-                      fontWeight: 700,
-                      color: '#fff',
-                      minWidth: '180px',
-                    }}
-                  >
-                    {node.label}
-                  </span>
-                  <span className="hidden sm:inline text-[#00d4ff]">|</span>
-                  <span
-                    className="text-white/70"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                  >
-                    {node.description}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
 
@@ -259,19 +400,10 @@ export function Solution() {
           animation: flowingDash 2s linear infinite;
         }
 
-        .stat-bar:hover {
-          border-left-color: #00d4ff;
-          box-shadow: -4px 0 20px rgba(0, 212, 255, 0.3);
-          transform: translateX(4px);
-        }
-
         @media (prefers-reduced-motion: reduce) {
           .orbit-ring,
           .flowing-line {
             animation: none;
-          }
-          .stat-bar:hover {
-            transform: none;
           }
         }
       `}</style>

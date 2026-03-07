@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 export function HowItWorks() {
-  const [visibleSteps, setVisibleSteps] = useState<number[]>([]);
+  const [visibleSteps, setVisibleSteps] = useState<number[]>(
+    [],
+  );
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -18,7 +20,7 @@ export function HowItWorks() {
           }
         });
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
 
     if (sectionRef.current) {
@@ -31,32 +33,33 @@ export function HowItWorks() {
   const steps = [
     {
       number: 1,
-      title: 'Upload',
-      description: 'Simply drop your image into our secure, private web interface.',
+      title: "Upload",
+      description:
+        "Upload any photo you want to protect from being used by AI.",
     },
     {
       number: 2,
-      title: 'Preprocess',
+      title: "Preprocess",
       description:
-        'IWe scan and optimize your file to ensure the best possible results.',
+        "Our system runs a quick check to prep the pixels for security.",
     },
     {
       number: 3,
-      title: 'Adversarial ',
+      title: "Adversarial ",
       description:
-        'Our tech adds an invisible layer that "scrambles" any AI tool.',
+        'We bake in a digital "noise" that makes your face unreadable to tech.',
     },
     {
       number: 4,
-      title: 'Quality Check',
+      title: "Quality Check",
       description:
-        'We verify that the protection is active while your photo stays clear.',
+        "We make sure the image looks perfect to you but broken to bots.",
     },
     {
       number: 5,
-      title: 'Protected ',
+      title: "Protected",
       description:
-        'DDownload your image and post it anywhere without a second thought.',
+        "Grab your protected file and share your life on social media again.",
     },
   ];
 
@@ -71,16 +74,17 @@ export function HowItWorks() {
           <h2
             className="text-4xl md:text-5xl tracking-[0.15em] uppercase mb-6"
             style={{
-              fontFamily: 'Orbitron, sans-serif',
+              fontFamily: "Orbitron, sans-serif",
               fontWeight: 700,
-              color: '#fff',
+              color: "#fff",
             }}
           >
-            TECHNICAL <span className="text-[#00d4ff]">APPROACH</span>
+            TECHNICAL{" "}
+            <span className="text-[#00d4ff]">APPROACH</span>
           </h2>
           <p
             className="text-lg text-white/70 max-w-[700px] mx-auto"
-            style={{ fontFamily: 'Inter, sans-serif' }}
+            style={{ fontFamily: "Inter, sans-serif" }}
           >
             Advanced adversarial machine learning pipeline
           </p>
@@ -94,7 +98,8 @@ export function HowItWorks() {
               <div
                 className="h-full bg-[#00d4ff] transition-all duration-1000 flowing-line"
                 style={{
-                  width: visibleSteps.length > 0 ? '100%' : '0%',
+                  width:
+                    visibleSteps.length > 0 ? "100%" : "0%",
                 }}
               ></div>
             </div>
@@ -105,22 +110,23 @@ export function HowItWorks() {
                   key={index}
                   className={`flex flex-col items-center transition-all duration-600 ${
                     visibleSteps.includes(index)
-                      ? 'opacity-100 translate-y-0'
-                      : 'opacity-0 translate-y-8'
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-8"
                   }`}
-                  style={{ width: '180px' }}
+                  style={{ width: "180px" }}
                 >
                   {/* Node */}
                   <div
                     className="w-24 h-24 rounded-full border-4 border-[#00d4ff] bg-[#050a0f] flex items-center justify-center mb-6"
                     style={{
-                      boxShadow: '0 0 30px rgba(0, 212, 255, 0.4)',
+                      boxShadow:
+                        "0 0 30px rgba(0, 212, 255, 0.4)",
                     }}
                   >
                     <span
                       className="text-3xl text-[#00d4ff]"
                       style={{
-                        fontFamily: 'Orbitron, sans-serif',
+                        fontFamily: "Orbitron, sans-serif",
                         fontWeight: 900,
                       }}
                     >
@@ -132,16 +138,16 @@ export function HowItWorks() {
                   <h3
                     className="text-xl mb-3 text-center"
                     style={{
-                      fontFamily: 'Orbitron, sans-serif',
+                      fontFamily: "Orbitron, sans-serif",
                       fontWeight: 700,
-                      color: '#fff',
+                      color: "#fff",
                     }}
                   >
                     {step.title}
                   </h3>
                   <p
                     className="text-sm text-white/70 text-center leading-relaxed"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
+                    style={{ fontFamily: "Inter, sans-serif" }}
                   >
                     {step.description}
                   </p>
@@ -158,8 +164,8 @@ export function HowItWorks() {
               key={index}
               className={`flex gap-6 transition-all duration-600 ${
                 visibleSteps.includes(index)
-                  ? 'opacity-100 translate-x-0'
-                  : 'opacity-0 -translate-x-8'
+                  ? "opacity-100 translate-x-0"
+                  : "opacity-0 -translate-x-8"
               }`}
             >
               {/* Node */}
@@ -167,13 +173,14 @@ export function HowItWorks() {
                 <div
                   className="w-16 h-16 rounded-full border-4 border-[#00d4ff] bg-[#050a0f] flex items-center justify-center"
                   style={{
-                    boxShadow: '0 0 20px rgba(0, 212, 255, 0.4)',
+                    boxShadow:
+                      "0 0 20px rgba(0, 212, 255, 0.4)",
                   }}
                 >
                   <span
                     className="text-2xl text-[#00d4ff]"
                     style={{
-                      fontFamily: 'Orbitron, sans-serif',
+                      fontFamily: "Orbitron, sans-serif",
                       fontWeight: 900,
                     }}
                   >
@@ -185,7 +192,9 @@ export function HowItWorks() {
                     <div
                       className="w-full bg-[#00d4ff] transition-all duration-1000"
                       style={{
-                        height: visibleSteps.includes(index + 1) ? '100%' : '0%',
+                        height: visibleSteps.includes(index + 1)
+                          ? "100%"
+                          : "0%",
                       }}
                     ></div>
                   </div>
@@ -197,16 +206,16 @@ export function HowItWorks() {
                 <h3
                   className="text-xl mb-2"
                   style={{
-                    fontFamily: 'Orbitron, sans-serif',
+                    fontFamily: "Orbitron, sans-serif",
                     fontWeight: 700,
-                    color: '#fff',
+                    color: "#fff",
                   }}
                 >
                   {step.title}
                 </h3>
                 <p
                   className="text-white/70 leading-relaxed"
-                  style={{ fontFamily: 'Inter, sans-serif' }}
+                  style={{ fontFamily: "Inter, sans-serif" }}
                 >
                   {step.description}
                 </p>

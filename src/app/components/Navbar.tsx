@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Shield } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router';
+import { Shield, LogOut, User as UserIcon } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export function Navbar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout, isAuthenticated } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,10 +21,36 @@ export function Navbar() {
   }, []);
 
   const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setMobileMenuOpen(false);
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => {
+        if (id === 'home') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          const element = document.getElementById(id);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      }, 100);
+    } else {
+      if (id === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+    setMobileMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+    if (location.pathname !== '/') {
+      navigate('/');
     }
   };
 
@@ -32,7 +64,10 @@ export function Navbar() {
         }`}
       >
         <div className="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <button
+            onClick={() => scrollToSection('home')}
+            className="flex items-center gap-3 cursor-pointer"
+          >
             <Shield className="w-8 h-8 text-[#00d4ff]" strokeWidth={2} />
             <span
               className="text-2xl tracking-[0.15em] uppercase"
@@ -45,10 +80,17 @@ export function Navbar() {
             >
               SENTINEL
             </span>
-          </div>
+          </button>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8">
+            <button
+              onClick={() => scrollToSection('home')}
+              className="text-white/80 hover:text-[#00d4ff] transition-colors"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Home
+            </button>
             <button
               onClick={() => scrollToSection('problem')}
               className="text-white/80 hover:text-[#00d4ff] transition-colors"
@@ -70,16 +112,51 @@ export function Navbar() {
             >
               How It Works
             </button>
-            <button
-              className="px-6 py-2 bg-[#00d4ff] text-[#050a0f] transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,212,255,0.5)]"
-              style={{
-                fontFamily: 'Orbitron, sans-serif',
-                fontWeight: 700,
-                clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
-              }}
-            >
-              GET PROTECTED
-            </button>
+
+            {/* Auth Section */}
+            {isAuthenticated ? (
+              <div className="relative">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#00d4ff]/10 border border-[#00d4ff]/30 hover:bg-[#00d4ff]/20 transition-all"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  <UserIcon className="w-4 h-4 text-[#00d4ff]" />
+                  <span className="text-white/90">{user?.name}</span>
+                </button>
+
+                {/* User Dropdown */}
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-[#050a0f]/95 backdrop-blur-xl border border-[#00d4ff]/20 rounded-lg overflow-hidden shadow-xl">
+                    <div className="p-3 border-b border-[#00d4ff]/10">
+                      <p className="text-xs text-white/60" style={{ fontFamily: 'Inter, sans-serif' }}>
+                        {user?.email}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-4 py-2 text-left flex items-center gap-2 hover:bg-[#ff2d55]/10 text-[#ff2d55] transition-colors"
+                      style={{ fontFamily: 'Inter, sans-serif' }}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate('/login')}
+                className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#00d4ff] to-[#00ff88] text-[#050a0f] hover:shadow-lg hover:shadow-[#00d4ff]/50 transition-all duration-300"
+                style={{
+                  fontFamily: 'Orbitron, sans-serif',
+                  fontWeight: 600,
+                  letterSpacing: '0.05em',
+                }}
+              >
+                LOGIN
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -104,6 +181,13 @@ export function Navbar() {
       >
         <div className="flex flex-col gap-6 p-8 pt-20">
           <button
+            onClick={() => scrollToSection('home')}
+            className="text-white/80 hover:text-[#00d4ff] transition-colors text-left"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          >
+            Home
+          </button>
+          <button
             onClick={() => scrollToSection('problem')}
             className="text-white/80 hover:text-[#00d4ff] transition-colors text-left"
             style={{ fontFamily: 'Inter, sans-serif' }}
@@ -124,16 +208,44 @@ export function Navbar() {
           >
             How It Works
           </button>
-          <button
-            className="px-6 py-2 bg-[#00d4ff] text-[#050a0f] transition-all duration-300"
-            style={{
-              fontFamily: 'Orbitron, sans-serif',
-              fontWeight: 700,
-              clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
-            }}
-          >
-            GET PROTECTED
-          </button>
+
+          <div className="border-t border-[#00d4ff]/15 pt-6 mt-2">
+            {isAuthenticated ? (
+              <>
+                <div className="mb-4 p-3 rounded-lg bg-[#00d4ff]/10 border border-[#00d4ff]/20">
+                  <p className="text-sm text-white/90 mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    {user?.name}
+                  </p>
+                  <p className="text-xs text-white/60" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    {user?.email}
+                  </p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 rounded-lg flex items-center gap-2 bg-[#ff2d55]/10 border border-[#ff2d55]/30 text-[#ff2d55] hover:bg-[#ff2d55]/20 transition-colors"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  navigate('/login');
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full px-6 py-3 rounded-lg bg-gradient-to-r from-[#00d4ff] to-[#00ff88] text-[#050a0f] hover:shadow-lg hover:shadow-[#00d4ff]/50 transition-all duration-300"
+                style={{
+                  fontFamily: 'Orbitron, sans-serif',
+                  fontWeight: 600,
+                  letterSpacing: '0.05em',
+                }}
+              >
+                LOGIN
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -142,6 +254,14 @@ export function Navbar() {
         <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
           onClick={() => setMobileMenuOpen(false)}
+        ></div>
+      )}
+
+      {/* Click outside to close user menu */}
+      {userMenuOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setUserMenuOpen(false)}
         ></div>
       )}
     </>

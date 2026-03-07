@@ -1,0 +1,207 @@
+Here's your precise prompt:
+
+---
+
+## 🛡️ Sentinel — "Protect My Image" Page Prompt
+
+**STRICT RULE: Change ONLY what is listed below. The main `index.html` gets one change only: the `PROTECT MY IMAGE` button links to the new page. Everything else on the existing site — all sections, animations, colors, fonts, navbar, footer — remains 100% identical. The new page is a completely separate `protect.html` file.**
+
+---
+
+### PART 1 — Main site change (index.html)
+
+The `PROTECT MY IMAGE` button in the Hero section: change its `onclick` from no action to `window.location.href = 'protect.html'`. That is the **only** change to `index.html`.
+
+---
+
+### PART 2 — New file: `protect.html`
+
+Create a new standalone HTML file. It must share the exact same:
+- Google Fonts import (`Orbitron` + `Inter`)
+- Color palette (`--bg-dark: #050a0f`, `--bg-mid: #0d1f2d`, `--cyan: #00d4ff`, `--green: #00ff88`, `--red: #ff2d55`)
+- Navbar — copied exactly from the main site. `Home` link scrolls back to `index.html` (use `href="index.html"`). `Problem`, `Solution`, `How It Works` links also go to `index.html#problem`, `index.html#solution`, `index.html#how-it-works`. Navbar scroll effect (transparent → frosted glass on scroll) works the same way.
+- Particle canvas background — exact same implementation as the Hero section (drifting cyan dots with connecting lines, 15% opacity)
+- Sonar ring animation — same three rings pulsing outward behind the upload area
+
+---
+
+### PART 3 — Page layout & flow
+
+The page has **three distinct states** that transition sequentially. Only one state is visible at a time.
+
+---
+
+#### STATE 1 — Upload Zone
+
+Full viewport height, centered content. Particle canvas + sonar rings run in background throughout all states.
+
+**Section heading:**
+- `UPLOAD YOUR IMAGE` in Orbitron Bold, ~2.2rem, white, `letter-spacing: 0.15em`, centered
+- Subline in Inter, `rgba(255,255,255,0.6)`, `0.95rem`: *"Your file is processed locally. Nothing is stored or transmitted."*
+
+**Upload Box:**
+A large drag-and-drop zone, centered, `max-width: 560px`, `width: 90%`:
+```
+background: rgba(0,212,255,0.03)
+border: 2px dashed rgba(0,212,255,0.3)
+border-radius: 8px
+padding: 60px 40px
+cursor: pointer
+transition: border-color 0.3s, box-shadow 0.3s
+```
+
+On hover and on drag-over:
+```
+border-color: #00d4ff
+box-shadow: 0 0 30px rgba(0,212,255,0.15), inset 0 0 20px rgba(0,212,255,0.05)
+```
+
+Inside the box, centered vertically and horizontally:
+- Upload SVG icon (arrow-up-from-box), `64px`, `color: #00d4ff`, with a subtle `0 0 20px rgba(0,212,255,0.5)` glow
+- Primary text: `"Drag & drop your image here"` — Orbitron, `1rem`, white, `letter-spacing: 0.08em`
+- Secondary text: `"or click to browse"` — Inter, `0.85rem`, `rgba(255,255,255,0.45)`, margin-top `8px`
+- Accepted formats line: `"Supports: JPG, PNG, WEBP"` — Inter, `0.75rem`, `rgba(255,255,255,0.3)`, margin-top `16px`
+- Hidden `<input type="file" accept="image/jpeg,image/png,image/webp">`
+
+When a file is selected (via click or drop):
+- The dashed border becomes solid cyan
+- The icon changes to a checkmark SVG (also cyan)
+- The primary text changes to the filename (truncated to 30 chars if needed)
+- The secondary text changes to the file size formatted as `"X.X MB"` or `"XXX KB"`
+- A `PROTECT MY IMAGE` button appears below the box with a `0.4s` fade-in:
+  - Orbitron Bold, `0.9rem`, cyan background, dark text
+  - `clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))`
+  - Same `ctaPulse` animation as the hero button
+  - On click: transitions to State 2
+
+---
+
+#### STATE 2 — Protection Pipeline (Loading)
+
+Transition from State 1: the upload box fades out over `0.4s`, then the pipeline UI fades in over `0.4s`.
+
+**Layout:** Centered, `max-width: 600px`. Contains:
+
+**Stage label** (top):
+- Current stage name displayed in Orbitron Bold, `1.1rem`, cyan, `letter-spacing: 0.12em`, centered
+- Updates live as percentage crosses each threshold
+
+**Percentage number:**
+- Large centered display: Orbitron Black, `5rem`, white, with a cyan text-shadow `0 0 30px rgba(0,212,255,0.6)`
+- Updates every animation frame as a smooth continuous count from `0` to `100`
+
+**Progress bar:**
+- Container: `width: 100%`, `height: 6px`, `background: rgba(0,212,255,0.1)`, `border-radius: 3px`, `overflow: hidden`, `margin: 24px 0`
+- Fill: `height: 100%`, `border-radius: 3px`, `transition: width linear`
+- The fill uses a gradient that shifts color across stages:
+  - 0–20%: `background: linear-gradient(90deg, #00d4ff, #00a8cc)` — cyan
+  - 21–40%: `background: linear-gradient(90deg, #00a8cc, #0080ff)` — cyan-blue
+  - 41–60%: `background: linear-gradient(90deg, #0080ff, #7b2ff7)` — blue-purple
+  - 61–80%: `background: linear-gradient(90deg, #7b2ff7, #00d4ff)` — purple back to cyan
+  - 81–100%: `background: linear-gradient(90deg, #00d4ff, #00ff88)` — cyan to green
+- A shimmer/gloss overlay animates across the fill: `@keyframes shimmer` — a `rgba(255,255,255,0.15)` highlight sliding left to right on `1.2s linear infinite`
+
+**Stage pipeline row** — 5 stages shown below the bar in a horizontal row (vertical stack on mobile):
+```
+LOADING  →  IMAGE PREPROCESSING  →  APPLYING PROTECTION  →  IMAGE POST PROCESSING  →  DONE
+```
+Each stage:
+- Small circle indicator (8px) + stage name in Orbitron `0.55rem`, `letter-spacing: 0.1em`
+- **Pending state:** circle `rgba(255,255,255,0.2)`, text `rgba(255,255,255,0.3)`
+- **Active state:** circle pulses cyan (`@keyframes stagePulse` — scale 1→1.4→1, `1s infinite`), text `#00d4ff`, full opacity
+- **Completed state:** circle solid `#00ff88`, text `rgba(255,255,255,0.6)`
+- Connecting dashes between stages: `border-top: 1px dashed rgba(0,212,255,0.2)`
+
+**Animation timing — continuous flow, never pauses:**
+The percentage counter runs from 0 to 100 over exactly `4000ms` total, using `requestAnimationFrame` with a linear easing. No stops, no pauses — pure continuous flow.
+
+Stage thresholds (purely visual label changes at these % values):
+- 0–20: label = `LOADING`
+- 21–40: label = `IMAGE PREPROCESSING`
+- 41–60: label = `APPLYING PROTECTION`
+- 61–80: label = `IMAGE POST PROCESSING`
+- 81–100: label = `DONE`
+
+When percentage reaches 100: wait `600ms`, then transition to State 3.
+
+---
+
+#### STATE 3 — Download Ready
+
+Transition from State 2: pipeline fades out over `0.4s`, success UI fades in over `0.5s`.
+
+**Success icon:**
+- Large shield SVG with a checkmark inside, `80px`, cyan, `box-shadow: 0 0 40px rgba(0,212,255,0.5)`
+- Entrance animation: `@keyframes shieldReveal` — scale `0.5→1.05→1` + opacity `0→1` over `0.6s cubic-bezier(0.34, 1.56, 0.64, 1)`
+
+**Success heading:**
+- `PROTECTION COMPLETE` in Orbitron Bold, `1.8rem`, white, `letter-spacing: 0.15em`
+
+**Disclaimer block** (professional, honest):
+A styled info panel below the heading:
+```
+background: rgba(0,212,255,0.04)
+border: 1px solid rgba(0,212,255,0.15)
+border-radius: 6px
+padding: 20px 28px
+max-width: 560px
+margin: 24px auto
+```
+Text in Inter, `0.88rem`, `line-height: 1.7`, `rgba(255,255,255,0.7)`:
+
+> **Sentinel Protection Report**
+>
+> Your image has been processed with adversarial perturbation technology (FGSM-based). This protection is designed to confuse and degrade AI-based deepfake generation models.
+>
+> **Estimated protection effectiveness: 70–85%** against standard generative AI models. Effectiveness may vary depending on the specific AI tool used, image resolution, and future model updates.
+>
+> This technology is a proactive defense layer — not a guarantee. We recommend using it in combination with platform privacy settings.
+
+Label `Sentinel Protection Report` in Orbitron `0.65rem` cyan, `letter-spacing: 0.12em`, `margin-bottom: 10px`.
+Rest of text in Inter as described.
+
+**Download button:**
+- `DOWNLOAD PROTECTED IMAGE` in Orbitron Bold, full cyan background, dark text
+- Same `clip-path` as all other primary buttons
+- Same `ctaPulse` animation
+- `padding: 16px 36px`
+- On click: triggers browser download of the uploaded file using `URL.createObjectURL` + an `<a>` element with `download` attribute set to `"sentinel_protected_[original-filename]"`
+- Since no actual backend processing happens, the downloaded file is the original uploaded image — this is acceptable for a frontend prototype
+
+**Process another image link:**
+- Below the download button, a plain text link: `"← Protect another image"` — Inter, `0.85rem`, `rgba(255,255,255,0.45)`, hover `#00d4ff`
+- On click: resets the entire page back to State 1, clears the file input
+
+---
+
+### PART 4 — Additional details
+
+**Page title:** `<title>Protect Your Image — Sentinel</title>`
+
+**No footer** on this page — clean exit at the bottom of the viewport.
+
+**Scroll behavior:** The page should not require scrolling — all three states should fit within the viewport height. Use `min-height: 100vh` with flexbox centering for the main content area.
+
+**Mobile responsive:**
+- Upload box padding reduces to `40px 24px` on mobile
+- Percentage number reduces to `3.5rem`
+- Stage pipeline stacks vertically with connecting vertical dashes instead of horizontal
+- Buttons go full width on mobile
+
+---
+
+### ✅ Verification Checklist
+- `PROTECT MY IMAGE` on homepage navigates to `protect.html`
+- Navbar on `protect.html` is identical to main site, all links work correctly back to `index.html`
+- Particle canvas + sonar rings run on `protect.html`
+- Upload box accepts drag-drop and click-to-browse
+- File selection updates icon, filename, filesize and reveals the protect button
+- Percentage flows 0→100 continuously over 4 seconds with no pauses
+- Stage labels update at correct thresholds
+- Stage indicator circles correctly show pending/active/complete states
+- Progress bar gradient shifts through stage colors with shimmer
+- State transitions use fade animations
+- Download triggers file save with `sentinel_protected_` prefix
+- Disclaimer block is present with effectiveness percentage
+- "Protect another image" resets to State 1
+- All fonts, colors, animations match the main site theme exactly
